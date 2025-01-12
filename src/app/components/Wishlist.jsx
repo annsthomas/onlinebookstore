@@ -90,7 +90,7 @@ export default function WishlistPage() {
             >
                 <ShoppingCart className="h-4 w-4" />
                 Add All To Cart
-            </button>: nullr
+            </button>: null
               }
             </div>
         </div>
