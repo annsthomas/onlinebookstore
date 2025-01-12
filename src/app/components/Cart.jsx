@@ -1,0 +1,218 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { Minus, Plus, X, ArrowLeft, ShoppingCart,EqualApproximatelyIcon } from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
+import book from '../../../public/home/books.jpg'
+import { useToast } from '@/hooks/use-toast';
+
+
+export default function CartPage() {
+    const { toast } = useToast()
+    const [cartItems, setCartItems] = useState([
+        {
+            id: 1,
+            title: "The World Atlas of Coffee",
+            price: 2500,
+            quantity: 1,
+            image: book
+        },
+        {
+            id: 2,
+            title: "Animal Farm",
+            price: 1800,
+            quantity: 1,
+            image: book
+        }
+    ])
+
+    const [orderNotes, setOrderNotes] = useState('')
+    const [couponCode, setCouponCode] = useState('')
+
+    const updateQuantity = (id, change) => {
+        setCartItems(items =>
+            items.map(item =>
+                item.id === id
+                    ? { ...item, quantity: Math.max(1, item.quantity + change) }
+                    : item
+            )
+        )
+    }
+
+    const removeItem = (id) => {
+        setCartItems(items => items.filter(item => item.id !== id))
+    }
+
+    const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+
+    const [token, settoken] = useState('true');
+
+    useEffect(() => {
+        // const token=localStorage.getItem('token')
+        settoken(localStorage.getItem('logintoken'))
+        console.log('token', token);
+
+
+
+    }, [settoken])
+    return (
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 className="text-2xl sm:text-3xl font-serif mb-6 sm:mb-8">My Cart</h1>
+
+            <div className="grid lg:grid-cols-3 gap-8 max-md:grid-cols-1">
+                <div className="lg:col-span-2">
+                    <div className="w-full overflow-x-auto">
+                        <table className="min-w-full table-auto divide-y divide-gray-200">
+                            <thead className="bg-gray-100">
+                                <tr>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Book Title</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                    <th className="px-4 py-2 text-right">
+                                        <span className="sr-only">Remove</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {cartItems.map((item) => (
+                                    <tr key={item.id}>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="flex-shrink-0 h-16 w-12 relative">
+                                                    <Image
+                                                        src={item.image}
+                                                        alt={item.title}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900">{item.title}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">{item.price} $</div>
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <div className="flex items-center space-x-2">
+                                                <button
+                                                    onClick={() => updateQuantity(item.id, -1)}
+                                                    className="p-1 hover:bg-gray-100 rounded"
+                                                    aria-label="Decrease quantity"
+                                                >
+                                                    <Minus className="h-4 w-4" />
+                                                </button>
+                                                <span className="w-8 text-center text-sm">{item.quantity}</span>
+                                                <button
+                                                    onClick={() => updateQuantity(item.id, 1)}
+                                                    className="p-1 hover:bg-gray-100 rounded"
+                                                    aria-label="Increase quantity"
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">{item.price * item.quantity} $</div>
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                            <button
+                                                onClick={() => removeItem(item.id)}
+                                                className="text-red-600 hover:text-red-900"
+                                                aria-label="Remove item"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {cartItems.length === 0 && (
+                        <div className="text-center py-16">
+                            <p className="text-gray-500 mb-4">Your cart is empty</p>
+                            <Link
+                                href="/"
+                                className="text-primary hover:text-primary/90"
+                            >
+                                Continue shopping
+                            </Link>
+                        </div>
+                    )}
+                </div>
+
+                <div className="space-y-6 mt-8 lg:mt-0">
+                    <div>
+                        <label htmlFor="orderNotes" className="block text-sm font-medium text-gray-700 mb-2">
+                            Order Notes
+                        </label>
+                        <textarea
+                            id="orderNotes"
+                            rows={4}
+                            className="w-full px-3 py-2 border rounded-md shadow-sm sm:text-sm resize-none"
+                            value={orderNotes}
+                            onChange={(e) => setOrderNotes(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="couponCode" className="block text-sm font-medium text-gray-700 mb-2">
+                            Coupon Code
+                        </label>
+                        <input
+                            type="text"
+                            id="couponCode"
+                            className="w-full px-3 py-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value)}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Coupon code will be applied on the checkout
+                        </p>
+                    </div>
+
+                    <div className="pt-4 border-t">
+                        <div className="flex justify-between items-center mb-4">
+                            <span className="text-base font-medium text-gray-900">Total Price :</span>
+                            <span className="text-base font-medium text-gray-900">{totalPrice} $</span>
+                        </div>
+
+                        <button
+                            className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={cartItems.length === 0}
+                            onClick={() => {
+                                token ? toast({
+                                    title: `Checkout Completed `,
+                                    description: "Great Choice 👉👈",
+
+                                }) :
+                                    toast({
+                                        title: `Login to Checkout `,
+                                        description: `Your items are waiting for you 👉👈 `,
+
+                                    })
+                            }}
+                        >
+                            <ShoppingCart className="h-5 w-5" />
+                            <span>Checkout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-8">
+                <Link
+                    href="/"
+                    className="inline-flex border-b-4 py-2 border-dotted items-center text-sm font-medium text-gray-600 hover:text-gray-900"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Continue Shopping
+                </Link>
+            </div>
+        </div>
+    )
+}
