@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Minus, Plus, X, ArrowLeft, ShoppingCart,EqualApproximatelyIcon } from 'lucide-react'
+import { Minus, Plus, X, ArrowLeft, ShoppingCart, EqualApproximatelyIcon } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import book from '../../../public/home/books.jpg'
@@ -62,75 +62,129 @@ export default function CartPage() {
 
             <div className="grid lg:grid-cols-3 gap-8 max-md:grid-cols-1">
                 <div className="lg:col-span-2">
-                    <div className="w-full overflow-x-auto">
-                        <table className="min-w-full table-auto divide-y divide-gray-200">
-                            <thead className="bg-gray-100">
-                                <tr>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Book Title</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                                    <th className="px-4 py-2 text-right">
-                                        <span className="sr-only">Remove</span>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {cartItems.map((item) => (
-                                    <tr key={item.id}>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-16 w-12 relative">
-                                                    <Image
-                                                        src={item.image}
-                                                        alt={item.title}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                </div>
-                                                <div className="ml-4">
-                                                    <div className="text-sm font-medium text-gray-900">{item.title}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900">{item.price} $</div>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <div className="flex items-center space-x-2">
-                                                <button
-                                                    onClick={() => updateQuantity(item.id, -1)}
-                                                    className="p-1 hover:bg-gray-100 rounded"
-                                                    aria-label="Decrease quantity"
-                                                >
-                                                    <Minus className="h-4 w-4" />
-                                                </button>
-                                                <span className="w-8 text-center text-sm">{item.quantity}</span>
-                                                <button
-                                                    onClick={() => updateQuantity(item.id, 1)}
-                                                    className="p-1 hover:bg-gray-100 rounded"
-                                                    aria-label="Increase quantity"
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900">{item.price * item.quantity} $</div>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="w-full">
+                        {/* Mobile view */}
+                        <div className="md:hidden space-y-4">
+                            {cartItems.map((item) => (
+                                <div key={item.id} className="bg-white shadow rounded-lg p-4">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex-shrink-0 h-20 w-16 relative">
+                                            <Image
+                                                src={item.image}
+                                                alt={item.title}
+                                                fill
+                                                className="object-cover rounded"
+                                            />
+                                        </div>
+                                        <div className="flex-grow">
+                                            <h3 className="text-sm font-medium text-gray-900">{item.title}</h3>
+                                            <p className="text-sm text-gray-500">{item.price} $</p>
+                                        </div>
+                                        <button
+                                            onClick={() => removeItem(item.id)}
+                                            className="text-red-600 hover:text-red-900"
+                                            aria-label="Remove item"
+                                        >
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                    <div className="mt-4 flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
                                             <button
-                                                onClick={() => removeItem(item.id)}
-                                                className="text-red-600 hover:text-red-900"
-                                                aria-label="Remove item"
+                                                onClick={() => updateQuantity(item.id, -1)}
+                                                className="p-1 hover:bg-gray-100 rounded"
+                                                aria-label="Decrease quantity"
                                             >
-                                                <X className="h-4 w-4" />
+                                                <Minus className="h-4 w-4" />
                                             </button>
-                                        </td>
+                                            <span className="w-8 text-center text-sm">{item.quantity}</span>
+                                            <button
+                                                onClick={() => updateQuantity(item.id, 1)}
+                                                className="p-1 hover:bg-gray-100 rounded"
+                                                aria-label="Increase quantity"
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                            Total: {item.price * item.quantity} $
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop view */}
+                        <div className="hidden md:block overflow-x-auto">
+                            <table className="min-w-full table-auto divide-y divide-gray-200">
+                                <thead className="bg-gray-100">
+                                    <tr>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Book Title</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                        <th className="px-4 py-2 text-right">
+                                            <span className="sr-only">Remove</span>
+                                        </th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {cartItems.map((item) => (
+                                        <tr key={item.id}>
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <div className="flex-shrink-0 h-16 w-12 relative">
+                                                        <Image
+                                                            src={item.image}
+                                                            alt={item.title}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className="ml-4">
+                                                        <div className="text-sm font-medium text-gray-900">{item.title}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">{item.price} $</div>
+                                            </td>
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, -1)}
+                                                        className="p-1 hover:bg-gray-100 rounded"
+                                                        aria-label="Decrease quantity"
+                                                    >
+                                                        <Minus className="h-4 w-4" />
+                                                    </button>
+                                                    <span className="w-8 text-center text-sm">{item.quantity}</span>
+                                                    <button
+                                                        onClick={() => updateQuantity(item.id, 1)}
+                                                        className="p-1 hover:bg-gray-100 rounded"
+                                                        aria-label="Increase quantity"
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">{item.price * item.quantity} $</div>
+                                            </td>
+                                            <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                                <button
+                                                    onClick={() => removeItem(item.id)}
+                                                    className="text-red-600 hover:text-red-900"
+                                                    aria-label="Remove item"
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     {cartItems.length === 0 && (
                         <div className="text-center py-16">
