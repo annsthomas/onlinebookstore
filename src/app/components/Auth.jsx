@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
-export default function AuthPage() {
-    const searchParams = useSearchParams()
+export function AuthPage() {
+
+   const searchParams = useSearchParams()
+    
     const router = useRouter()
     const [activeTab, setActiveTab] = useState('login')
     const [loginData, setLoginData] = useState({
@@ -312,3 +314,12 @@ export default function AuthPage() {
     )
 }
 
+
+const Auth = () => (
+    <Suspense fallback={<div>Loading...</div>}>
+        <AuthPage />
+    </Suspense>
+);
+
+
+export default Auth;

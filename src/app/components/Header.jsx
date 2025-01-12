@@ -145,13 +145,15 @@ const Header = () => {
                             </button>
                         </Link>
 
-                        <button className="flex items-center space-x-1" onClick={() => {
-                            localStorage.removeItem('logintoken')
-                        }}>
-                            <LogOut className="h-5 w-5" />
-                            <span className="hidden lg:inline">Logout</span>
-                        </button>
-
+                        {
+                            token ? <button className="flex items-center space-x-1" onClick={() => {
+                                localStorage.removeItem('logintoken')
+                            }}>
+                                <LogOut className="h-5 w-5" />
+                                <span className="hidden lg:inline">Logout</span>
+                            </button>
+                                : null
+                        }
                     </div>
                     {/* Mobile Search */}
                     <div className="flex md:hidden items-center space-x-4">
@@ -160,12 +162,15 @@ const Header = () => {
                         </div>
                         <Link href={token ? '/profile' : '/auth'}> <User className="h-5 w-5" /></Link>
                         <Link href="/cart">   <ShoppingCart className="h-5 w-5" />  </Link>
-                        <button className="flex items-center space-x-1" onClick={() => {
-                            localStorage.removeItem('logintoken')
-                        }}>
-                            <LogOut className="h-5 w-5" />
-                            <span className="hidden lg:inline">Logout</span>
-                        </button>
+                        {
+                            token ? <button className="flex items-center space-x-1" onClick={() => {
+                                localStorage.removeItem('logintoken')
+                            }}>
+                                <LogOut className="h-5 w-5" />
+                                <span className="hidden lg:inline">Logout</span>
+                            </button>
+                                : null
+                        }
 
                     </div>
                 </div>
