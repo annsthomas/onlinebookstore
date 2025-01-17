@@ -6,25 +6,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import book from '../../../public/home/books.jpg'
 import { useToast } from '@/hooks/use-toast';
+import GlobalApi from '../utils/GlobalApi'
 
 
 export default function CartPage() {
     const { toast } = useToast()
+    const [userdata, setuserdata] = useState([]);
+
     const [cartItems, setCartItems] = useState([
-        {
-            id: 1,
-            title: "The World Atlas of Coffee",
-            price: 2500,
-            quantity: 1,
-            image: book
-        },
-        {
-            id: 2,
-            title: "Animal Farm",
-            price: 1800,
-            quantity: 1,
-            image: book
-        }
+
     ])
 
     const [orderNotes, setOrderNotes] = useState('')
@@ -40,22 +30,116 @@ export default function CartPage() {
         )
     }
 
-    const removeItem = (id) => {
-        setCartItems(items => items.filter(item => item.id !== id))
-    }
 
-    const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+
+
+
+    const totalPrice = Array.isArray(cartItems)
+        ? cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        : 0;
+
 
     const [token, settoken] = useState('true');
 
+    const GetOrderItems = async () => {
+
+        try {
+
+
+            const Userdata = JSON.parse(userdata);
+
+
+
+
+            const response = await GlobalApi.GetOrderItems(Userdata._id);
+
+            console.log(response);
+            setCartItems(response)
+
+
+        } catch (error) {
+
+            console.log('error', error);
+
+        }
+    }
+
+
+
+    const removeItem = async (id) => {
+
+        try {
+            const response = await GlobalApi.DeleteItem(id);
+
+
+            GetOrderItems();
+
+        } catch (error) {
+            console.log('error', error);
+
+        }
+    }
+
+
+    const CreateCart = async () => {
+        try {
+
+            if (!totalPrice) {
+                return;
+            }
+
+
+            if(!token)
+            {
+                toast({
+                    title: `Login to Checkout `,
+                    description: `Your items are waiting for you 👉👈 `,
+
+                })
+    
+                return;
+            }
+
+            const Userdata = JSON.parse(userdata);
+
+            const response = await GlobalApi.CreateCart(
+                "67883f3fdc1e5a8a9af13e88", Userdata._id, couponCode, totalPrice, orderNotes
+            )
+
+
+
+            toast({
+                title: `Checkout Completed `,
+                description: "Great Choice 👉👈",
+
+            })
+
+        } catch (error) {
+            console.log('error', error);
+            toast({
+                title: `Some Error Occured `,
+                description: `Please try again Later.. `,
+
+            })
+    
+
+
+        }
+    }
+
     useEffect(() => {
-        // const token=localStorage.getItem('token')
-        settoken(localStorage.getItem('logintoken'))
-        console.log('token', token);
+        settoken(localStorage.getItem('XLogined'))
+        setuserdata(localStorage.getItem('XLogined'));
 
 
 
-    }, [settoken])
+    }, [token])
+
+
+    useEffect(() => {
+        GetOrderItems();
+    }, [token])
+
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <h1 className="text-2xl sm:text-3xl font-serif mb-6 sm:mb-8">My Cart</h1>
@@ -65,23 +149,23 @@ export default function CartPage() {
                     <div className="w-full">
                         {/* Mobile view */}
                         <div className="md:hidden space-y-4">
-                            {cartItems.map((item) => (
-                                <div key={item.id} className="bg-white shadow rounded-lg p-4">
+                            {(Array.isArray(cartItems) ? cartItems : []).map((item) => (
+                                <div key={item._id} className="bg-white shadow rounded-lg p-4">
                                     <div className="flex items-center space-x-4">
                                         <div className="flex-shrink-0 h-20 w-16 relative">
                                             <Image
-                                                src={item.image}
-                                                alt={item.title}
+                                                src={book}
+                                                alt="book"
                                                 fill
                                                 className="object-cover rounded"
                                             />
                                         </div>
                                         <div className="flex-grow">
-                                            <h3 className="text-sm font-medium text-gray-900">{item.title}</h3>
+                                            <h3 className="text-sm font-medium text-gray-900">{item.book.title}</h3>
                                             <p className="text-sm text-gray-500">{item.price} $</p>
                                         </div>
                                         <button
-                                            onClick={() => removeItem(item.id)}
+                                            onClick={() => removeItem(item._id)}
                                             className="text-red-600 hover:text-red-900"
                                             aria-label="Remove item"
                                         >
@@ -129,20 +213,20 @@ export default function CartPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {cartItems.map((item) => (
-                                        <tr key={item.id}>
+                                    {(Array.isArray(cartItems) ? cartItems : []).map((item) => (
+                                        <tr key={item._id}>
                                             <td className="px-4 py-3 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <div className="flex-shrink-0 h-16 w-12 relative">
                                                         <Image
-                                                            src={item.image}
-                                                            alt={item.title}
+                                                            src={book}
+                                                            alt="book"
                                                             fill
                                                             className="object-cover"
                                                         />
                                                     </div>
                                                     <div className="ml-4">
-                                                        <div className="text-sm font-medium text-gray-900">{item.title}</div>
+                                                        <div className="text-sm font-medium text-gray-900">{item.book.title}</div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -173,7 +257,7 @@ export default function CartPage() {
                                             </td>
                                             <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                                                 <button
-                                                    onClick={() => removeItem(item.id)}
+                                                    onClick={() => removeItem(item._id)}
                                                     className="text-red-600 hover:text-red-900"
                                                     aria-label="Remove item"
                                                 >
@@ -232,23 +316,14 @@ export default function CartPage() {
                     <div className="pt-4 border-t">
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-base font-medium text-gray-900">Total Price :</span>
-                            <span className="text-base font-medium text-gray-900">{totalPrice} $</span>
+                            <span className="text-base font-medium text-gray-900">{totalPrice.toFixed(2)} $</span>
                         </div>
 
                         <button
                             className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center space-x-2 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled={cartItems.length === 0}
                             onClick={() => {
-                                token ? toast({
-                                    title: `Checkout Completed `,
-                                    description: "Great Choice 👉👈",
-
-                                }) :
-                                    toast({
-                                        title: `Login to Checkout `,
-                                        description: `Your items are waiting for you 👉👈 `,
-
-                                    })
+                                CreateCart()
                             }}
                         >
                             <ShoppingCart className="h-5 w-5" />

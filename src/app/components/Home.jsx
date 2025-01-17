@@ -7,20 +7,154 @@ import Books from '../../../public/home/books.jpg'
 import RecentActivity from './RecentActivity';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
+import GlobalApi from '../utils/GlobalApi';
 
 const LandingPage = () => {
     const { toast } = useToast()
 
     const [token, settoken] = useState('true');
+    const [newarrival, setnewarrival] = useState([])
+    const [userdata, setuserdata] = useState([]);
+    const [Classic, setClassic] = useState([]);
+    const [Fiction, setFiction] = useState([]);
 
+
+    const GetBooks = async () => {
+
+        const respose = await GlobalApi.GetBooks();
+        setnewarrival(respose)
+
+
+    }
+
+
+    const HandleOrder = async (price, bookid, bookname) => {
+        if (!token) {
+            toast({
+                title: `Login to Buy "${bookname.toUpperCase()} `,
+                description: `${bookname.toUpperCase()}" is waiting for you 👉👈 `,
+
+            })
+            return;
+        }
+
+
+        try {
+
+
+            const userData = JSON.parse(userdata);
+
+            const response = await GlobalApi.CreateOrder(bookid, userData._id, price);
+
+
+
+            if (response.status === 500 || response.status === 400) {
+
+
+
+                toast({
+                    title: 'Error Creating Order',
+                    description: "Error",
+                });
+
+            }
+
+            if (response.status === 200) {
+                toast({
+                    title: `Added "${bookname.toUpperCase()}" to your cart `,
+                    description: "Great Choice 👉👈",
+                });
+            }
+
+
+        } catch (error) {
+            console.log('error', error);
+
+        }
+
+
+
+    }
+
+    const GetBookClassic = async () => {
+
+        try {
+
+
+            const response = await GlobalApi.GetBookByType('Classic');
+
+
+            setClassic(response);
+
+        } catch (error) {
+            console.log('error', error);
+
+
+        }
+    }
+
+    const GetBookFiction = async () => {
+
+        try {
+
+
+            const response = await GlobalApi.GetBookByType('Fiction');
+
+
+            setFiction(response);
+
+        } catch (error) {
+            console.log('error', error);
+
+
+        }
+    }
+
+
+    const HandleWishList = async (bookid, bookname) => {
+        if (!token) {
+            toast({
+                title: `Login to Bookmark "${bookname.toUpperCase()} `,
+                description: `${bookname.toUpperCase()}" is waiting for you 👉👈 `,
+
+            })
+            return;
+        }
+        try {
+            const userData = JSON.parse(userdata);
+
+            const response = await GlobalApi.AddToWishList(bookid, userData._id)
+
+
+            toast({
+                title: `Bookmarked "${bookname.toUpperCase()} `,
+                description: "Great Choice 👉👈",
+            });
+
+
+        } catch (error) {
+            console.log(error);
+            toast({
+                title: 'Error while Bookmark ',
+                description: "Error",
+            });
+
+
+
+        }
+    }
     useEffect(() => {
-        // const token=localStorage.getItem('token')
-        settoken(localStorage.getItem('logintoken'))
-        console.log('token', token);
-
+        settoken(localStorage.getItem('XLogined'));
+        setuserdata(localStorage.getItem('XLogined'));
+        GetBookClassic();
+        GetBooks();
+        GetBookFiction();
 
 
     }, [settoken])
+
+
+
     return (
         <>
             <section className="container mx-auto px-6 py-12 md:py-24 ">
@@ -57,7 +191,10 @@ const LandingPage = () => {
                     <h3 className="text-2xl font-serif">New Arrivals</h3>
                     <Link href={{
                         pathname: '/books',
-                        query: { title: "Our New Arrivals" }
+                        query: {
+                            title: "Our New Arrivals",
+                            type: "New"
+                        }
 
                     }
 
@@ -66,72 +203,26 @@ const LandingPage = () => {
                 </div>
 
                 <div className="grid grid-cols-2 max-md:grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-                    {[
-                        {
-                            title: "A Tale of Two Cities",
-                            price: "MMK: 16,100",
-                            image: Books
-                        },
-                        {
-                            title: "Animal Farm",
-                            price: "MMK: 5,900",
-                            image: Books
-                        },
-                        {
-                            title: "Black House",
-                            price: "MMK: 18,150",
-                            image: Books
-                        },
-                        {
-                            title: "Below Zero",
-                            price: "MMK: 5,500",
-                            image: Books
-                        },
-                        {
-                            title: "Hooked",
-                            price: "MMK: 7,500",
-                            image: Books
-                        }
-                    ].map((book, index) => (
+                    {newarrival.slice(0, 5).map((book, index) => (
                         <div key={index} className="space-y-3 border-2 px-8 py-5 rounded-xl cursor-pointer">
                             <div className="relative aspect-[3/4] bg-gray-100">
                                 <Image
-                                    src={book.image}
-                                    alt={book.title}
+                                    src={Books}
+                                    alt={'book'}
                                     fill
+
                                     className="object-cover rounded-xl"
                                 />
                             </div>
                             <h4 className="font-medium">{book.title}</h4>
-                            <p className="text-gray-600">{book.price}</p>
+                            <p className="text-gray-600">$ {book.price}</p>
                             <div className="flex items-center space-x-2 ">
                                 <button className="flex-1 bg-gray-900 text-white px-4 py-2 text-sm hover:bg-gray-700"
-                                    onClick={() => {
-                                        token ? toast({
-                                            title: `Added "${book.title.toUpperCase()}" to your cart `,
-                                            description: "Great Choice 👉👈",
-
-                                        }) :
-                                            toast({
-                                                title: `Login to Buy "${book.title.toUpperCase()} `,
-                                                description: `${book.title.toUpperCase()}" is waiting for you 👉👈 `,
-
-                                            })
-                                    }}>
+                                    onClick={() => HandleOrder(book.price, book._id, book.title)}>
                                     Add To Cart
                                 </button>
                                 <button className="p-2 border border-gray-200 hover:border-gray-900"
-                                    onClick={() => {
-                                        token ? toast({
-                                            title: `Bookmarked "${book.title.toUpperCase()} `,
-                                            description: "Great Choice 👉👈",
-
-                                        }) : toast({
-                                            title: `Login to Bookmark "${book.title.toUpperCase()}`,
-                                            description: `"${book.title.toUpperCase()}" is waiting for you 👉👈 `,
-
-                                        })
-                                    }}
+                                    onClick={() => HandleWishList(book._id, book.title)}
                                 >
                                     <Heart className="h-4 w-4" />
                                 </button>
@@ -146,45 +237,22 @@ const LandingPage = () => {
                     </h3>
                     <Link href={{
                         pathname: '/books',
-                        query: { title: "Classic" }
+                        query: {
+                            title: "Classic",
+                            type: "Classic"
+                        }
 
                     }
 
                     }
                         passHref>     <button className="text-gray-600 hover:text-black">See All →</button></Link>                </div>
                 <div className="grid grid-cols-2 max-md:grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-                    {[
-                        {
-                            title: "A Tale of Two Cities",
-                            price: "MMK: 16,100",
-                            image: Books
-                        },
-                        {
-                            title: "Animal Farm",
-                            price: "MMK: 5,900",
-                            image: Books
-                        },
-                        {
-                            title: "Black House",
-                            price: "MMK: 18,150",
-                            image: Books
-                        },
-                        {
-                            title: "Below Zero",
-                            price: "MMK: 5,500",
-                            image: Books
-                        },
-                        {
-                            title: "Hooked",
-                            price: "MMK: 7,500",
-                            image: Books
-                        }
-                    ].map((book, index) => (
+                    {Classic.slice(0, 5).map((book, index) => (
                         <div key={index} className="space-y-3 cursor-pointer border-2 px-8 py-5 rounded-xl">
                             <div className="relative aspect-[3/4] bg-gray-100 ">
                                 <Image
-                                    src={book.image}
-                                    alt={book.title}
+                                    src={Books}
+                                    alt='books'
                                     fill
                                     className="object-cover rounded-xl"
                                 />
@@ -193,32 +261,11 @@ const LandingPage = () => {
                             <p className="text-gray-600">{book.price}</p>
                             <div className="flex items-center space-x-2 ">
                                 <button className="flex-1 bg-gray-900 text-white px-4 py-2 text-sm hover:bg-gray-700"
-                                    onClick={() => {
-                                        token ? toast({
-                                            title: `Added "${book.title.toUpperCase()}" to your cart `,
-                                            description: "Great Choice 👉👈",
-
-                                        }) :
-                                            toast({
-                                                title: `Login to Buy "${book.title.toUpperCase()} `,
-                                                description: `${book.title.toUpperCase()}" is waiting for you 👉👈 `,
-
-                                            })
-                                    }}>
+                                    onClick={() => HandleOrder(book.price, book._id, book.title)}>
                                     Add To Cart
                                 </button>
                                 <button className="p-2 border border-gray-200 hover:border-gray-900"
-                                    onClick={() => {
-                                        token ? toast({
-                                            title: `Bookmarked "${book.title.toUpperCase()}"  `,
-                                            description: "Great Choice 👉👈",
-
-                                        }) : toast({
-                                            title: `Login to Bookmark "${book.title.toUpperCase()}`,
-                                            description: `"${book.title.toUpperCase()}" is waiting for you 👉👈 `,
-
-                                        })
-                                    }}
+                                    onClick={() => HandleWishList(book._id, book.title)}
                                 >
                                     <Heart className="h-4 w-4" />
                                 </button>
@@ -233,7 +280,10 @@ const LandingPage = () => {
                     </h3>
                     <Link href={{
                         pathname: '/books',
-                        query: { title: "Fiction" }
+                        query: {
+                            title: "Fiction",
+                            type: "Fiction"
+                        }
 
                     }
 
@@ -241,38 +291,12 @@ const LandingPage = () => {
                         passHref>     <button className="text-gray-600 hover:text-black">See All →</button></Link>                </div>
 
                 <div className="grid grid-cols-2 max-md:grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-                    {[
-                        {
-                            title: "A Tale of Two Cities",
-                            price: "MMK: 16,100",
-                            image: Books
-                        },
-                        {
-                            title: "Animal Farm",
-                            price: "MMK: 5,900",
-                            image: Books
-                        },
-                        {
-                            title: "Black House",
-                            price: "MMK: 18,150",
-                            image: Books
-                        },
-                        {
-                            title: "Below Zero",
-                            price: "MMK: 5,500",
-                            image: Books
-                        },
-                        {
-                            title: "Hooked",
-                            price: "MMK: 7,500",
-                            image: Books
-                        }
-                    ].map((book, index) => (
+                    {Fiction.slice(0, 5).map((book, index) => (
                         <div key={index} className=" cursor-pointer space-y-3 border-2 px-8 py-5 rounded-xl ">
                             <div className="relative aspect-[3/4] bg-gray-100">
                                 <Image
-                                    src={book.image}
-                                    alt={book.title}
+                                    src={Books}
+                                    alt='books'
                                     fill
                                     className="object-cover rounded-xl"
                                 />
@@ -281,32 +305,11 @@ const LandingPage = () => {
                             <p className="text-gray-600">{book.price}</p>
                             <div className="flex items-center space-x-2 ">
                                 <button className="flex-1 bg-gray-900 text-white px-4 py-2 text-sm hover:bg-gray-700"
-                                    onClick={() => {
-                                        token ? toast({
-                                            title: `Added "${book.title.toUpperCase()}" to your cart `,
-                                            description: "Great Choice 👉👈",
-
-                                        }) :
-                                            toast({
-                                                title: `Login to Buy "${book.title.toUpperCase()} `,
-                                                description: `${book.title.toUpperCase()}" is waiting for you 👉👈 `,
-
-                                            })
-                                    }}>
+                                    onClick={() => HandleOrder(book.price, book._id, book.title)}>
                                     Add To Cart
                                 </button>
                                 <button className="p-2 border border-gray-200 hover:border-gray-900"
-                                    onClick={() => {
-                                        token ? toast({
-                                            title: `Bookmarked "${book.title.toUpperCase()}"  `,
-                                            description: "Great Choice 👉👈",
-
-                                        }) : toast({
-                                            title: `Login to Bookmark "${book.title.toUpperCase()}`,
-                                            description: `"${book.title.toUpperCase()}" is waiting for you 👉👈 `,
-
-                                        })
-                                    }}
+                                    onClick={() => HandleWishList(book._id, book.title)}
                                 >
                                     <Heart className="h-4 w-4" />
                                 </button>

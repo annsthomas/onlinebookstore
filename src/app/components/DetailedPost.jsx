@@ -10,84 +10,136 @@ import { Reviews } from "./Reviews"
 import { RelatedBooks } from "./Related"
 import { useParams } from 'next/navigation';
 import book from '../../../public/home/books.jpg';
+import GlobalApi from "../utils/GlobalApi"
+import { useEffect, useState } from "react"
+import { useToast } from '@/hooks/use-toast';
 
-
-const MOCK_BOOK = {
-  id: '1',
-  title: 'The Great Gatsby',
-  author: 'F. Scott Fitzgerald',
-  description: 'A story of decadence and excess...',
-  longDescription: `The Great Gatsby is a 1925 novel by American writer F. Scott Fitzgerald. 
-    Set in the Jazz Age on Long Island, near New York City, the novel depicts first-person 
-    narrator Nick Carraway's interactions with mysterious millionaire Jay Gatsby and Gatsby's 
-    obsession to reunite with his former lover, Daisy Buchanan.`,
-  coverImage: book,
-  images: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
-  tags: ['Classic', 'Fiction', 'Literature'],
-  rating: 4.5,
-  price: 19.99,
-  pages: 180,
-  language: 'English',
-  publisher: 'Scribner',
-  publishedDate: '1925-04-10',
-  isbn: '978-0743273565'
-}
 
 export default function BookDetails() {
+  const { toast } = useToast()
 
   const { id } = useParams();
+  const [token, settoken] = useState('true');
+
+  const [bookid, setbookid] = useState();
+  const [userdata, setuserdata] = useState([]);
+
+  const [bookdata, setbookdata] = useState([]);
+  const GetBookById = async () => {
+    try {
+
+
+
+      const response = await GlobalApi.GetBookById(id);
+
+
+      console.log('r', response);
+      setbookdata(response);
+
+    } catch (error) {
+      console.log('error', error);
+
+
+    }
+  }
+
+  useEffect(() => {
+    GetBookById();
+    setuserdata(localStorage.getItem('XLogined'));
+    settoken(localStorage.getItem('XLogined'));
+
+    setbookid(id);
+  }, [])
+
+  const HandleOrder = async (price, bookid, bookname) => {
+    if (!token) {
+      toast({
+        title: `Login to Buy "${bookname.toUpperCase()} `,
+        description: `${bookname.toUpperCase()}" is waiting for you 👉👈 `,
+
+      })
+      return;
+    }
+
+
+    try {
+
+
+      const userData = JSON.parse(userdata);
+
+      const response = await GlobalApi.CreateOrder(bookid, userData._id, price);
+
+
+
+      if (response.status === 500 || response.status === 400) {
+
+
+
+        toast({
+          title: 'Error Creating Order',
+          description: "Error",
+        });
+
+      }
+
+      if (response.status === 200) {
+        toast({
+          title: `Added "${bookname.toUpperCase()}" to your cart `,
+          description: "Great Choice 👉👈",
+        });
+      }
+
+
+    } catch (error) {
+      console.log('error', error);
+
+    }
+
+
+
+  }
+
 
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="grid lg:grid-cols-3 gap-8">
-       
+
         <div className="space-y-4">
           <div className="mx-auto">
             <Image
-              src={MOCK_BOOK.coverImage}
-              alt={MOCK_BOOK.title}
-             
+              src={book}
+              alt="book"
+
               className=" rounded-lg mx-auto"
               priority
             />
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {MOCK_BOOK.images.map((image, index) => (
-              <div key={index} className="aspect-square relative">
-                <Image
-                  src={image}
-                  alt={`${MOCK_BOOK.title} - Image ${index + 1}`}
-                  fill
-                  className="object-cover rounded-md"
-                />
-              </div>
-            ))}
-          </div>
+         
         </div>
 
         {/* Middle Column - Book Details */}
         <div className="lg:col-span-2 space-y-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">{MOCK_BOOK.title}</h1>
-            <p className="text-xl text-muted-foreground mb-4">by {MOCK_BOOK.author}</p>
+            <h1 className="text-3xl font-bold mb-2">{bookdata.title}</h1>
+            <p className="text-xl text-muted-foreground mb-4">by {bookdata.authorName}</p>
             <div className="flex items-center gap-2 mb-4">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-5 h-5 ${i < Math.floor(MOCK_BOOK.rating)
+                    className={`w-5 h-5 ${i < Math.floor(bookdata.rating)
                       ? 'fill-primary text-primary'
                       : 'fill-muted text-muted-foreground'
                       }`}
                   />
                 ))}
               </div>
-              <span className="text-muted-foreground">({MOCK_BOOK.rating})</span>
+              <span className="text-muted-foreground">({bookdata.rating})</span>
             </div>
             <div className="flex flex-wrap gap-2 mb-6">
-              {MOCK_BOOK.tags.map((tag) => (
-                <Badge key={tag} variant="secondary">{tag}</Badge>
-              ))}
+
+              <Badge key={bookdata.type} variant="secondary">{bookdata.type}</Badge>
+
             </div>
           </div>
 
@@ -99,7 +151,7 @@ export default function BookDetails() {
             </TabsList>
 
             <TabsContent value="description" className="space-y-4">
-              <p className="text-muted-foreground">{MOCK_BOOK.longDescription}</p>
+              <p className="text-muted-foreground">{bookdata.description}</p>
             </TabsContent>
 
             <TabsContent value="details">
@@ -107,23 +159,23 @@ export default function BookDetails() {
                 <CardContent className="grid grid-cols-2 gap-4 p-6">
                   <div>
                     <p className="text-sm font-medium">Pages</p>
-                    <p className="text-sm text-muted-foreground">{MOCK_BOOK.pages}</p>
+                    <p className="text-sm text-muted-foreground">{bookdata?.details?.pages}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium">Language</p>
-                    <p className="text-sm text-muted-foreground">{MOCK_BOOK.language}</p>
+                    <p className="text-sm text-muted-foreground">{bookdata?.details?.language}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium">Publisher</p>
-                    <p className="text-sm text-muted-foreground">{MOCK_BOOK.publisher}</p>
+                    <p className="text-sm text-muted-foreground">{bookdata?.authorName}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium">Published Date</p>
-                    <p className="text-sm text-muted-foreground">{MOCK_BOOK.publishedDate}</p>
+                    <p className="text-sm text-muted-foreground">{bookdata?.details?.isbn}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium">ISBN</p>
-                    <p className="text-sm text-muted-foreground">{MOCK_BOOK.isbn}</p>
+                    <p className="text-sm text-muted-foreground">{bookdata?.details?.isbn}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -135,16 +187,16 @@ export default function BookDetails() {
           </Tabs>
 
           <div className="flex gap-4 pt-6 items-start">
-            <Button size="lg" className="">
-              Add to Cart - ${MOCK_BOOK.price}
-            </Button>
-           
+            <button size="lg" className="bg-black text-white py-3 px-3 roounded-2xl" onClick={() => HandleOrder(bookdata.price, bookdata._id, bookdata.title)}>
+              Add to Cart - ${bookdata.price}
+            </button>
+
           </div>
         </div>
       </div>
 
       <section className="mt-16">
-        <h2 className="text-2xl font-bold mb-6">Related Books</h2>
+        <h2 className="text-2xl bg-black text-white py-3 px-3 font-bold mb-6">Related Books</h2>
         <RelatedBooks currentBookId={id} />
       </section>
     </main>

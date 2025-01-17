@@ -2,11 +2,14 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import GlobalApi from '../utils/GlobalApi'
+import { useToast } from '@/hooks/use-toast';
 
 export function AuthPage() {
+    const { toast } = useToast()
 
-   const searchParams = useSearchParams()
-    
+    const searchParams = useSearchParams()
+
     const router = useRouter()
     const [activeTab, setActiveTab] = useState('login')
     const [loginData, setLoginData] = useState({
@@ -22,7 +25,7 @@ export function AuthPage() {
         password: '',
         confirmPassword: '',
         address: '',
-        role: 'buyer'
+        role: ''
     })
 
     const [errors, setErrors] = useState({})
@@ -36,10 +39,50 @@ export function AuthPage() {
 
     const handleLoginSubmit = async (e) => {
         e.preventDefault()
+
+
         try {
-            // Add your login API call here
-            localStorage.setItem('logintoken', "true");
-            router.push('/')
+
+
+
+
+
+
+            const newErrors = {}
+
+            if (!loginData.email) newErrors.email = 'Email is required1'
+            if (!loginData.password) newErrors.password = 'password is required2'
+
+            if (Object.keys(newErrors).length > 0) {
+                setErrors(newErrors)
+                return
+            }
+
+            const response = await GlobalApi.LoginUser(loginData.email, loginData.password);
+
+            if (response.status === 500 || response.status === 400) {
+
+
+
+                toast({
+                    title: response.data.message,
+                    description: "Error",
+                });
+
+            }
+
+            if (response.status === 200) {
+                toast({
+                    title: `${registerData.fullName.toUpperCase()} Good to See you Again `,
+                    description: "Continue Engaging..",
+                });
+
+                localStorage.setItem('XLogined', JSON.stringify(response.data));
+
+                router.push('/');
+
+            }
+
         } catch (error) {
             console.error('Login error:', error)
         }
@@ -48,7 +91,7 @@ export function AuthPage() {
     const handleRegisterSubmit = async (e) => {
         e.preventDefault()
 
-        // Basic validation
+
         const newErrors = {}
 
         if (!registerData.fullName) newErrors.fullName = 'Full name is required'
@@ -59,7 +102,12 @@ export function AuthPage() {
         if (registerData.password !== registerData.confirmPassword) {
             newErrors.confirmPassword = 'Passwords do not match'
         }
-        if (!registerData.address) newErrors.address = 'Address is required'
+
+        if (!registerData.role) newErrors.role = 'Role is required'
+
+        if (registerData.role === "Buyer") {
+            if (!registerData.address) newErrors.address = 'Address is required'
+        }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors)
@@ -67,10 +115,57 @@ export function AuthPage() {
         }
 
         try {
-            // Add your registration API call here
-            console.log('Register data:', registerData)
-            localStorage.setItem('  ', "true");
-            router.push('/')
+
+
+            const response = await GlobalApi.RegisterUser(
+                registerData.fullName,
+                registerData.email,
+                registerData.username,
+                registerData.phone,
+                registerData.role,
+                registerData.password,
+
+
+
+            )
+
+
+            console.log(response.status);
+
+            if (response.status === 500) {
+
+
+                if (response.data.message.includes('duplicate key error')) {
+
+                    toast({
+                        title: "The email address is already in use. Please choose a different one.",
+                        description: "Error",
+                    });
+                }
+                else {
+                    toast({
+                        title: response.data.message,
+                        description: "Error",
+                    });
+                }
+
+
+
+            }
+
+            if (response.status === 200) {
+                console.log('');
+                toast({
+                    title: `${registerData.fullName.toUpperCase()} Congrats you are Registered`,
+                    description: "Registration Successfull",
+                });
+
+                localStorage.setItem('XLogined', JSON.stringify(response.data));
+                router.push('/');
+
+            }
+
+
         } catch (error) {
             console.error('Registration error:', error)
         }
@@ -225,8 +320,8 @@ export function AuthPage() {
                                 value={registerData.role}
                                 onChange={(e) => setRegisterData({ ...registerData, role: e.target.value })}
                             >
-                                <option value="buyer">Buyer</option>
-                                <option value="seller">Seller</option>
+                                <option value="Buyer">Buyer</option>
+                                <option value="Seller">Seller</option>
                             </select>
                         </div>
 
@@ -270,7 +365,7 @@ export function AuthPage() {
 
 
                         {
-                            registerData.role === "buyer" ?
+                            registerData.role === "Buyer" ?
                                 <div>
                                     <label htmlFor="address" className="block text-sm font-medium text-gray-700">
                                         Address

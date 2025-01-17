@@ -18,8 +18,8 @@ export function RelatedBooks({ currentBookId }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {MOCK_RELATED.map((book) => (
-        <Link key={book.id} href={`/search/details/${book.id}`}>
-          <Card className="hover:shadow-lg transition-shadow">
+        // <Link key={book.id} href={`/search/details/${book.id}`}>
+          <Card key={book.id} className="hover:shadow-lg transition-shadow">
             <CardContent className="p-4">
               <div className="aspect-[2/3] relative mb-4">
                 <Image
@@ -40,7 +40,7 @@ export function RelatedBooks({ currentBookId }) {
               </div>
             </CardContent>
           </Card>
-        </Link>
+        // </Link>
       ))}
     </div>
   )

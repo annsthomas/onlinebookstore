@@ -10,7 +10,6 @@ export default function PersonalInfo({ user }) {
     const [phone, setPhone] = useState(user.phone)
 
     const handleSave = () => {
-        // Here you would typically send a request to update the user's information
         console.log('Saving:', { email, phone })
         setIsEditing(false)
     }
@@ -50,11 +49,11 @@ export default function PersonalInfo({ user }) {
                 <div>
                     <p>Email: {user.email}</p>
                     <p>Phone: {user.isCurrentUser ? user.phone : '***-***-****'}</p>
-                    {user.isCurrentUser && (
-                        <Button onClick={() => setIsEditing(true)} className="mt-4">
-                            Edit
-                        </Button>
-                    )}
+
+                    <Button onClick={() => setIsEditing(true)} className="mt-4">
+                        Edit
+                    </Button>
+
                 </div>
             )}
         </div>

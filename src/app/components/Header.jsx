@@ -5,6 +5,7 @@ import { User, Heart, ShoppingCart, X, LogOut } from 'lucide-react'
 import Link from 'next/link';
 import Image from 'next/image';
 import books from '../../../public/home/book.png'
+import { useRouter } from 'next/navigation'
 
 // Mock data for search results
 const mockBooks = [
@@ -16,17 +17,18 @@ const mockBooks = [
 ];
 
 const Header = () => {
+
+    const router = useRouter();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const searchRef = useRef(null);
 
-    const [token, settoken] = useState('true');
+    const [token, settoken] = useState(false);
 
     useEffect(() => {
-        // const token=localStorage.getItem('token')
-        settoken(localStorage.getItem('logintoken'))
-        console.log('token', token);
+        settoken(localStorage.getItem('XLogined'))
+
 
 
 
@@ -147,7 +149,10 @@ const Header = () => {
 
                         {
                             token ? <button className="flex items-center space-x-1" onClick={() => {
-                                localStorage.removeItem('logintoken')
+                                localStorage.removeItem('XLogined')
+                                router.push('/')
+                                window.location.reload();
+
                             }}>
                                 <LogOut className="h-5 w-5" />
                                 <span className="hidden lg:inline">Logout</span>
@@ -164,7 +169,11 @@ const Header = () => {
                         <Link href="/cart">   <ShoppingCart className="h-5 w-5" />  </Link>
                         {
                             token ? <button className="flex items-center space-x-1" onClick={() => {
-                                localStorage.removeItem('logintoken')
+                                localStorage.removeItem('XLogined')
+                                router.push('/')
+                                window.location.reload();
+
+
                             }}>
                                 <LogOut className="h-5 w-5" />
                                 <span className="hidden lg:inline">Logout</span>

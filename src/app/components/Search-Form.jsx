@@ -9,63 +9,73 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import Image from "next/image"
 import Link from "next/link"
 import book from '../../../public/home/books.jpg'
+import GlobalApi from "../utils/GlobalApi"
 
-// Mock data - replace with actual API call
 const MOCK_RESULTS = [
-  {
-    id: '1',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    description: 'A story of decadence and excess...',
-    coverImage: book ,
-    tags: ['Classic', 'Fiction', 'Literature'],
-    rating: 4.5
-  },
-  {
-    id: '2',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    description: 'A story of decadence and excess...',
-    coverImage: book ,
-    tags: ['Classic', 'Fiction', 'Literature'],
-    rating: 4.5
-  },
-  {
-    id: '3',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    description: 'A story of decadence and excess...',
-    coverImage: book ,
-    tags: ['Classic', 'Fiction', 'Literature'],
-    rating: 4.5
-  },{
-    id: '4',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    description: 'A story of decadence and excess...',
-    coverImage: book ,
-    tags: ['Classic', 'Fiction', 'Literature'],
-    rating: 4.5
-  },{
-    id: '5',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    description: 'A story of decadence and excess...',
-    coverImage: book ,
-    tags: ['Classic', 'Fiction', 'Literature'],
-    rating: 4.5
-  },
-  // Add more mock items...
+    {
+        id: '1',
+        title: 'The Great Gatsby',
+        author: 'F. Scott Fitzgerald',
+        description: 'A story of decadence and excess...',
+        coverImage: book,
+        tags: ['Classic', 'Fiction', 'Literature'],
+        rating: 4.5
+    },
+    {
+        id: '2',
+        title: 'The Great Gatsby',
+        author: 'F. Scott Fitzgerald',
+        description: 'A story of decadence and excess...',
+        coverImage: book,
+        tags: ['Classic', 'Fiction', 'Literature'],
+        rating: 4.5
+    },
+    {
+        id: '3',
+        title: 'The Great Gatsby',
+        author: 'F. Scott Fitzgerald',
+        description: 'A story of decadence and excess...',
+        coverImage: book,
+        tags: ['Classic', 'Fiction', 'Literature'],
+        rating: 4.5
+    }, {
+        id: '4',
+        title: 'The Great Gatsby',
+        author: 'F. Scott Fitzgerald',
+        description: 'A story of decadence and excess...',
+        coverImage: book,
+        tags: ['Classic', 'Fiction', 'Literature'],
+        rating: 4.5
+    }, {
+        id: '5',
+        title: 'The Great Gatsby',
+        author: 'F. Scott Fitzgerald',
+        description: 'A story of decadence and excess...',
+        coverImage: book,
+        tags: ['Classic', 'Fiction', 'Literature'],
+        rating: 4.5
+    },
 ]
+
 
 export default function SearchPage() {
     const [query, setQuery] = useState('')
+
     const [results, setResults] = useState(MOCK_RESULTS) // For demo, replace with API results
 
     // Update results based on the query (for demo, we're just using MOCK_RESULTS)
     const handleSearchChange = (e) => {
         setQuery(e.target.value)
     }
+
+    const GetBooks = async () => {
+
+        const respose = await GlobalApi.GetBooks();
+        setnewarrival(respose)
+
+
+    }
+
 
     useEffect(() => {
         if (query) {
@@ -86,7 +96,7 @@ export default function SearchPage() {
             {/* Search Form */}
             <form className="flex gap-2 mb-8 flex-col justify-center items-center">
                 <div className="relative flex-1 w-full">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4"  />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
                         type="search"
                         placeholder="Search books by title, author, or keyword..."
@@ -95,7 +105,7 @@ export default function SearchPage() {
                         className="pl-10"
                     />
                 </div>
-              
+
             </form>
 
             {/* Display Results */}
@@ -108,7 +118,7 @@ export default function SearchPage() {
                                     <Image
                                         src={book.coverImage}
                                         alt={book.title}
-                                        
+
                                         className="w-48 rounded-md"
                                     />
                                 </div>
