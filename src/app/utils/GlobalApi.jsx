@@ -113,7 +113,7 @@ const CreateOrder = async (book_id, user_id, price) => {
         let config = {
             method: 'post',
             maxBodyLength: Infinity,
-            url: 'http://localhost:3001/api/order/',
+            url: `${axiosClient.defaults.baseURL}order/`,
             headers: {
                 'Content-Type': 'application/json'
             },
