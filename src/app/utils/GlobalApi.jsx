@@ -1,6 +1,6 @@
 const { default: axios } = require('axios');
 const axiosClient = axios.create({
-    baseURL: 'http://localhost:3001/api/'
+    baseURL: 'https://bookcube-be-production.up.railway.app/api/'
 })
 
 

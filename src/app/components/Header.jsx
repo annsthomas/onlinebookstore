@@ -7,7 +7,6 @@ import Image from 'next/image';
 import books from '../../../public/home/book.png'
 import { useRouter } from 'next/navigation'
 
-// Mock data for search results
 const mockBooks = [
     { id: 1, title: "A Tale of Two Cities", author: "Charles Dickens", price: "MMK: 16,100" },
     { id: 2, title: "Animal Farm", author: "George Orwell", price: "MMK: 5,900" },
