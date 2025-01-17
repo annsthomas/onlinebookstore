@@ -315,7 +315,7 @@ const CreateCart = async (order_id, user_id, coupon, total, order_note) => {
         const config = {
             method: 'post',
             maxBodyLength: Infinity,
-            url: 'http://localhost:3001/api/cart/',
+            url: `${axiosClient.defaults.baseURL}cart/`,
             headers: {
                 'Content-Type': 'application/json'
             },
