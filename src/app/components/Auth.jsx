@@ -208,11 +208,11 @@ export function AuthPage() {
                             />
                         </div>
 
-                        <div>
+                        {/* <div>
                             <button type="button" className="text-sm text-gray-600 hover:text-gray-900">
                                 Forgot your password?
                             </button>
-                        </div>
+                        </div> */}
 
                         <button
                             type="submit"
