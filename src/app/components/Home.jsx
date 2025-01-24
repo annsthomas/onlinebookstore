@@ -158,6 +158,7 @@ const LandingPage = () => {
     return (
         <>
             <section className="container mx-auto px-6 py-12 md:py-24 ">
+               <Link href="/me"> <h1 className='text-3xl font-semibold hover:underline'>About me </h1></Link>
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div className="space-y-6">
                         <h2 className="text-4xl md:text-6xl font-serif leading-tight text-[#363636]">
