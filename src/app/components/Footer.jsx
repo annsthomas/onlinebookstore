@@ -39,8 +39,8 @@ export default function Footer() {
                         </p>
                         <div className="text-muted-foreground">
                             <p>Address:</p>
-                            <p>No (77), 123 Main Street, Thingangyun,</p>
-                            <p>Yangon</p>
+                            <p>No (77), 123 Main Street, NYC,</p>
+                            <p>New York</p>
                         </div>
                     </div>
                 </div>
